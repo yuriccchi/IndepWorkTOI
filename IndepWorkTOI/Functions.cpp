@@ -67,65 +67,6 @@ bool compareByAge(const Data& a, const Data& b)
     return a._age.age > b._age.age;
 }
 
-// Ввод данных (Индексы)
-void dataInput(Data* (&data), int& n, int* (&indexes))
-{
-    // Проверка на заполненность
-    if (n >= 200)
-    {
-        cout << "Массив данных полностью заполнен. Невозможно добавить новые данные." << endl;
-        return;
-    }
-
-    // Определение, сколько за раз данных ввести
-    cout << "Введите количество вводимых сейчас данных: ";
-    int newDataCount;
-    cin >> newDataCount;
-
-    int totalSize = n + newDataCount; // Определение нового количества данных в бд
-
-    // Создаем временный массив для объединения старых и новых данных
-    Data* newData = new Data[totalSize];
-
-    // Копируем старые данные в новый массив
-    for (int i = 0; i < n; ++i)
-    {
-        newData[i] = data[i];
-    }
-
-    // Добавление индексов
-    for (int i = 0; i < totalSize; ++i)
-    {
-        indexes[i] = i;
-    }
-
-    cout << "Введите информацию" << endl;
-    cout << "------------------" << endl;
-
-    // Вводим данные
-    for (int i = n; i < totalSize; ++i)
-    {
-        cout << "Введите имя и фамилию: ";
-        cin >> newData[i]._initial.firstName >> newData[i]._initial.lastName;
-
-        cout << "Введите день и месяц дня рождения: ";
-        newData[i]._date.day = intInputDay();
-        newData[i]._date.month = intInputMonth();
-
-        cout << "Введите, сколько лет сейчас вашему другу: ";
-        cin >> newData[i]._age.age;
-
-        cout << "Введите, какие подарки любит ваш друг: ";
-        cin >> newData[i]._loveGifts.loveGifts;
-
-        cout << "___________________________" << endl;
-    }
-
-    delete[] data; // Очищаем старый массив
-    data = newData; // Переключаем указатель на новый массив
-    n = totalSize; // Обновляем количество элементов в массиве
-}
-
 // Печать данных по возрастанию имени (по алфавиту) (Индексы)
 void printNameAscending(Data* data, int* indexes, int count)
 {
@@ -160,7 +101,7 @@ void printAgeDescending(Data* data, int* indexes, int count)
         });
 
     // Печать данных
-    for (int i = count - 1; i >= 0; --i)
+    for (int i = 0; i < count; ++i)
     {
         cout << data[indexes[i]]._initial.firstName << " " << data[indexes[i]]._initial.lastName << ", возраст: " << data[indexes[i]]._age.age << " лет" << endl;
     }
@@ -182,7 +123,7 @@ int binarySearchByName(Data* data, int* indexes, string key, int low, int high, 
         return binarySearchByName(data, indexes, key, low, mid - 1, comparator);
 }
 
-// Итеративный бинарный поиск по возраста (Индексы)
+// Итеративный бинарный поиск по возрасту (Индексы)
 int binarySearchByAge(Data* data, int* indexes, int count, int key, function<int(const Data&, int key)> comparator)
 {
     int low = 0;
@@ -285,169 +226,241 @@ void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firs
     }
 }
 
-// Ввод данных (Бинарное дерево)
-void dataInput(Data* (&data), int& n, IndexTree& indexTree)
+// Функция вставки нового узла в дерево (Бинарное дерево)
+Data* insert(Data* node, const Data& data) {
+    if (node == nullptr) {
+        return createNode(data);  // Создание нового узла
+    }
+
+    // Рекурсивное вставка узла в соответствующее поддерево
+    if (data._initial.firstName < node->_initial.firstName) {
+        node->left = insert(node->left, data);  // Вставка в левое поддерево
+    }
+    else if (data._initial.firstName > node->_initial.firstName) {
+        node->right = insert(node->right, data);  // Вставка в правое поддерево
+    }
+    else {
+        // Обработка дубликатов, если они не поддерживаются
+        return node;
+    }
+
+    // Обновление высоты узла
+    node->height = 1 + max(height(node->left), height(node->right));
+
+    // Вычисление коэффициента балансировки для узла
+    int balance = balanceFactor(node);
+
+    // Балансировка дерева
+    if (balance > 1 && data._initial.firstName < node->left->_initial.firstName)
+        return rotateRight(node);  // Левый левый случай
+
+    if (balance > 1 && data._initial.firstName > node->left->_initial.firstName) {
+        node->left = rotateLeft(node->left);
+        return rotateRight(node);  // Левый правый случай
+    }
+
+    if (balance < -1 && data._initial.firstName > node->right->_initial.firstName)
+        return rotateLeft(node);  // Правый правый случай
+
+    if (balance < -1 && data._initial.firstName < node->right->_initial.firstName) {
+        node->right = rotateRight(node->right);
+        return rotateLeft(node);  // Правый левый случай
+    }
+
+    return node;
+}
+
+// Функция поиска по имени (Бинарное дерево)
+void searchByName(Data* root, const string& firstName) {
+    searchByNameUtil(root, firstName);
+}
+
+// Функция поиска по возрасту (Бинарное дерево)
+void searchByAge(Data* root, int age) {
+    searchByAgeUtil(root, age);
+}
+
+// Функция удаления узла из дерева по имени (Бинарное дерево)
+Data* remove(Data* root, const string& firstName) {
+    return removeUtil(root, firstName);
+}
+
+// Вспомогательная функция для получения высоты узла (Бинарное дерево)
+int height(Data* node) {
+    if (node == nullptr) return 0;
+    return node->height;
+}
+
+// Вспомогательная функция для вычисления коэффициента балансировки узла (Бинарное дерево)
+int balanceFactor(Data* node) {
+    if (node == nullptr) return 0;
+    return height(node->left) - height(node->right);
+}
+
+// Вспомогательная функция для выполнения правого вращения узла (Бинарное дерево)
+Data* rotateRight(Data* y) {
+    Data* x = y->left;
+    Data* T2 = x->right;
+
+    x->right = y;
+    y->left = T2;
+
+    y->height = max(height(y->left), height(y->right)) + 1;
+    x->height = max(height(x->left), height(x->right)) + 1;
+
+    return x;
+}
+
+// Вспомогательная функция для выполнения левого вращения узла (Бинарное дерево)
+Data* rotateLeft(Data* x) {
+    Data* y = x->right;
+    Data* T2 = y->left;
+
+    y->left = x;
+    x->right = T2;
+
+    x->height = max(height(x->left), height(x->right)) + 1;
+    y->height = max(height(y->left), height(y->right)) + 1;
+
+    return y;
+}
+
+// Вспомогательная функция для создания нового узла (Бинарное дерево)
+Data* createNode(const Data& data)
 {
-    // Проверка на заполненность
-    if (n >= 200) {
-        cout << "Массив данных полностью заполнен. Невозможно добавить новые данные." << endl;
+    Data* newNode = new Data();
+    newNode->_initial = data._initial;
+    /*newNode->_date = data._date;*/
+    newNode->_age = data._age;
+    /*newNode->_loveGifts = data._loveGifts;*/
+    newNode->left = nullptr;
+    newNode->right = nullptr;
+    newNode->height = 1;
+    return newNode;
+}
+
+// Вспомогательная функция для поиска по имени в дереве (Бинарное дерево)
+void searchByNameUtil(Data* node, const string& firstName) 
+{
+    if (node == nullptr) return;
+
+    if (node->_initial.firstName == firstName)
+    {
+        // Вывод или дальнейшая обработка найденных данных
+        cout << "Name: " << node->_initial.firstName << " " << node->_initial.lastName << endl;
+        /*cout << "Date of Birth: " << node->_date.day << "/" << node->_date.month << endl;*/
+        cout << "Age: " << node->_age.age << endl;
+        /*cout << "Gifts: " << node->_loveGifts.loveGifts << endl;*/
+
         return;
     }
 
-    // Определение, сколько за раз данных ввести
-    cout << "Введите количество вводимых сейчас данных: ";
-    int newDataCount;
-    cin >> newDataCount;
+    if (firstName < node->_initial.firstName)
+    {
+        searchByNameUtil(node->left, firstName);
+    }
+    else
+    {
+        searchByNameUtil(node->right, firstName);
+    }
+}
 
-    int totalSize = n + newDataCount; // Определение нового количества данных в бд
+// Вспомогательная функция для поиска по возрасту в дереве (Бинарное дерево)
+void searchByAgeUtil(Data* node, int age) 
+{
+    if (node == nullptr) return;
 
-    cout << "Введите информацию" << endl;
-    cout << "------------------" << endl;
+    if (node->_age.age == age)
+    {
+        // Вывод или дальнейшая обработка найденных данных
+        cout << "Name: " << node->_initial.firstName << " " << node->_initial.lastName << endl;
+        /*cout << "Date of Birth: " << node->_date.day << "/" << node->_date.month << endl;*/
+        cout << "Age: " << node->_age.age << endl;
+        /*cout << "Gifts: " << node->_loveGifts.loveGifts << endl;*/
 
-    // Вводим данные
-    for (int i = n; i < totalSize; ++i) {
-        cout << "Введите имя и фамилию: ";
-        cin >> data[i]._initial.firstName >> data[i]._initial.lastName;
+        return;
+    }
 
-        cout << "Введите день и месяц дня рождения: ";
-        data[i]._date.day = intInputDay();
-        data[i]._date.month = intInputMonth();
+    if (age < node->_age.age)
+    {
+        searchByAgeUtil(node->left, age);
+    }
+    else
+    {
+        searchByAgeUtil(node->right, age);
+    }
+}
 
-        cout << "Введите, сколько лет сейчас вашему другу: ";
-        cin >> data[i]._age.age;
+// Вспомогательная функция для поиска минимального узла в правом поддереве (Бинарное дерево)
+Data* minValueNode(Data* node)
+{
+    Data* current = node;
+    while (current->left != nullptr)
+    {
+        current = current->left;
+    }
+    return current;
+}
 
-        cout << "Введите, какие подарки любит ваш друг: ";
-        cin >> data[i]._loveGifts.loveGifts;
+// Вспомогательная функция для удаления узла из дерева (Бинарное дерево)
+Data* removeUtil(Data* root, const string& firstName)
+{
+    if (root == nullptr) return root;
 
-        cout << "___________________________" << endl;
-
-        // Добавление элемента в индекс бинарного дерева
-        TreeNode* newNode = new TreeNode(data[i]._initial.firstName, i);
-        if (!indexTree.root)
+    if (firstName < root->_initial.firstName)
+    {
+        root->left = removeUtil(root->left, firstName);
+    }
+    else if (firstName > root->_initial.firstName)
+    {
+        root->right = removeUtil(root->right, firstName);
+    }
+    else
+    {
+        if (root->left == nullptr || root->right == nullptr)
         {
-            indexTree.root = newNode;
-        }
-        else
-        {
-            TreeNode* current = indexTree.root;
-            while (true)
+            Data* temp = root->left ? root->left : root->right;
+            if (temp == nullptr)
             {
-                if (newNode->key < current->key)
-                {
-                    if (!current->left)
-                    {
-                        current->left = newNode;
-                        break;
-                    }
-                    current = current->left;
-                }
-                else
-                {
-                    if (!current->right)
-                    {
-                        current->right = newNode;
-                        break;
-                    }
-                    current = current->right;
-                }
+                temp = root;
+                root = nullptr;
             }
+            else
+            {
+                *root = *temp;
+            }
+            delete temp;
         }
-        indexTree.count++;
-    }
-
-    n = totalSize; // Обновляем количество элементов в массиве
-}
-
-// Печать данных по возрастанию имени (по алфавиту) (Бинарное дерево)
-void printNameAscending(Data* data, TreeNode* node) {
-    if (node)
-    {
-        printNameAscending(data, node->left);
-        cout << data[node->dataIndex]._initial.firstName << " " << data[node->dataIndex]._initial.lastName << ", возраст: " << data[node->dataIndex]._age.age << " лет" << endl;
-        printNameAscending(data, node->right);
-    }
-}
-
-// Печать данных по убыванию возраста (Бинарное дерево)
-void printAgeDescending(TreeNode* node, Data* data)
-{
-    if (!node)
-        return;
-
-    // Обход левой ветви
-    printAgeDescending(node->left, data);
-
-    // Выводим данные
-    Data record = data[node->dataIndex];
-    cout << record._initial.firstName << " " << record._initial.lastName << ", возраст: " << record._age.age << " лет" << endl;
-
-    // Обход правой ветви
-    printAgeDescending(node->right, data);
-}
-
-// Поиск по имени (Бинарное дерево)
-TreeNode* searchByName(TreeNode* root, const string& key, Data* data)
-{
-    while (root != nullptr && root->key != key)
-    {
-        if (key < root->key)
-            root = root->left;
         else
-            root = root->right;
+        {
+            Data* temp = minValueNode(root->right);
+            root->_initial = temp->_initial;
+            root->right = removeUtil(root->right, temp->_initial.firstName);
+        }
     }
 
-    if (root != nullptr)
-    {
-        Data foundData = getDataByIndex(data, root->dataIndex);
-        cout << "Найденная запись: " << foundData._initial.firstName << " " << foundData._initial.lastName << ", возраст: " << foundData._age.age << " лет" << endl;
+    if (root == nullptr) return root;
+
+    root->height = 1 + max(height(root->left), height(root->right));
+
+    int balance = balanceFactor(root);
+
+    // Четыре случая несбалансированности, обрабатываемые соответствующими вращениями
+    if (balance > 1 && balanceFactor(root->left) >= 0)
+        return rotateRight(root);  // Левый левый случай
+
+    if (balance > 1 && balanceFactor(root->left) < 0) {
+        root->left = rotateLeft(root->left);
+        return rotateRight(root);  // Левый правый случай
     }
-    else
-        std::cout << "Запись с указанным именем не найдена";
+
+    if (balance < -1 && balanceFactor(root->right) <= 0)
+        return rotateLeft(root);  // Правый правый случай
+
+    if (balance < -1 && balanceFactor(root->right) > 0) {
+        root->right = rotateRight(root->right);
+        return rotateLeft(root);  // Правый левый случай
+    }
 
     return root;
 }
-
-// Поиск по возрасту (Бинарное дерево)
-TreeNode* searchByAge(TreeNode* root, const int& age, Data* data)
-{
-    while (root != nullptr && root->dataIndex != age)
-    {
-        if (age < root->dataIndex)
-            root = root->left;
-        else
-            root = root->right;
-    }
-
-    if (root != nullptr)
-    {
-        Data foundData = getDataByIndex(data, root->dataIndex);
-        cout << "Найденная запись: " << foundData._initial.firstName << " " << foundData._initial.lastName << ", возраст: " << foundData._age.age << " лет" << endl;
-    }
-    else
-        std::cout << "Запись с указанным возрастом не найдена";
-
-    return root;
-}
-
-// Функция для получения данных из массива
-Data getDataByIndex(Data* data, int index)
-{
-    return data[index];
-}
-
-//// Редактирование данных по имени
-//void editRecord(Data* data, TreeNode* root, const string& firstName, const string& newFirstName, const string& newLastName, int newAge) {
-//    TreeNode* node = searchByName(root, firstName);
-//    if (node)
-//    {
-//        int index = node->dataIndex;
-//        data[index]._initial.firstName = newFirstName;
-//        data[index]._initial.lastName = newLastName;
-//        data[index]._age.age = newAge;
-//    }
-//    else
-//        cout << "Запись с указанным именем и фамилией не найдена" << endl;
-//}
-
-// Удаление записи по имени
-

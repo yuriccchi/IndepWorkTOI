@@ -37,7 +37,6 @@ int main()
     string searchName;
     int newAge;
     int _stateMenu = -1;
-    IndexTree indexTree;
     TreeNode* foundNode;
 
     //Массивы
@@ -125,18 +124,18 @@ int main()
             dataInput(data, count, indexTree);
             break;
         case 9:
-            cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
+            /*cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
             printNameAscending(data, indexTree.root);
-            break;
+            break;*/
         case 10:
-            cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
+            /*cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
             printAgeDescending(indexTree.root, data);
-            break;
+            break;*/
         case 11:
-            cout << "Введите имя для поиска: ";
+            /*cout << "Введите имя для поиска: ";
             cin >> searchName;
             foundNode = searchByName(indexTree.root, searchName, data);
-            break;
+            break;*/
 
         case 12:
             //cout << "Введите возраст для поиска: ";

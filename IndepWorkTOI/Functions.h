@@ -43,24 +43,14 @@ struct Data
     Gift _loveGifts;
 };
 
-// —труктура дл€ узла бинарного дерева
+// —труктура бинарного дерева дл€ возраста
 struct TreeNode
 {
-    string key;
-    int dataIndex;
+    int age;
+    int index;
     TreeNode* left;
     TreeNode* right;
-
-    TreeNode(string k, int idx) : key(k), dataIndex(idx), left(nullptr), right(nullptr) {}
-};
-
-// —труктура дл€ хранени€ индексов и бинарного дерева
-struct IndexTree
-{
-    TreeNode* root;
-    int count;
-
-    IndexTree() : root(nullptr), count(0) {}
+    TreeNode(int age, int index) : age(age), index(index), left(nullptr), right(nullptr) {}
 };
 
 //  омпаратор дл€ бинарного поиска по имени
@@ -98,11 +88,9 @@ void editRecord(Data* (&data), int count, const string& firstName, const string&
 void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firstName);
 
 //  дл€ части 2
-void dataInput(Data* (&data), int& n, IndexTree& indexTree);
-void printNameAscending(Data* data, TreeNode* node);
-void printAgeDescending(TreeNode* node, Data* data);
-TreeNode* searchByName(TreeNode* root, const string& key, Data* data);
-//TreeNode* searchByAge(TreeNode* root, int age, Data* data);
-Data getDataByIndex(Data* data, int index);
-//void editRecord(Data* data, TreeNode* root, const string& firstName, const string& newFirstName, const string& newLastName, int newAge);
+Data* insert(Data* node, const Data& data);
+void searchByName(Data* root, const string& firstName);
+void searchByAge(Data* root, int age);
+Data* remove(Data* root, const string& firstName);
+
 //  дл€ части 3
