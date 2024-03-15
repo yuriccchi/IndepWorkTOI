@@ -51,6 +51,65 @@ int intInputMonth()
     return month;
 }
 
+// Ввод данных (Индексы)
+void dataInput(Data* (&data), int& n, int* (&indexes))
+{
+    // Проверка на заполненность
+    if (n >= 200)
+    {
+        cout << "Массив данных полностью заполнен. Невозможно добавить новые данные." << endl;
+        return;
+    }
+
+    // Определение, сколько за раз данных ввести
+    cout << "Введите количество вводимых сейчас данных: ";
+    int newDataCount;
+    cin >> newDataCount;
+
+    int totalSize = n + newDataCount; // Определение нового количества данных в бд
+
+    // Создаем временный массив для объединения старых и новых данных
+    Data* newData = new Data[totalSize];
+
+    // Копируем старые данные в новый массив
+    for (int i = 0; i < n; ++i)
+    {
+        newData[i] = data[i];
+    }
+
+    // Добавление индексов
+    for (int i = 0; i < totalSize; ++i)
+    {
+        indexes[i] = i;
+    }
+
+    cout << "Введите информацию" << endl;
+    cout << "------------------" << endl;
+
+    // Вводим данные
+    for (int i = n; i < totalSize; ++i)
+    {
+        cout << "Введите имя и фамилию: ";
+        cin >> newData[i]._initial.firstName >> newData[i]._initial.lastName;
+
+        cout << "Введите день и месяц дня рождения: ";
+        newData[i]._date.day = intInputDay();
+        newData[i]._date.month = intInputMonth();
+
+        cout << "Введите, сколько лет сейчас вашему другу: ";
+        cin >> newData[i]._age.age;
+
+        cout << "Введите, какие подарки любит ваш друг: ";
+        cin >> newData[i]._loveGifts.loveGifts;
+
+        cout << "___________________________" << endl;
+    }
+
+    delete[] data; // Очищаем старый массив
+    data = newData; // Переключаем указатель на новый массив
+    n = totalSize; // Обновляем количество элементов в массиве
+}
+
 // Сортировка по имени (возрастание)
 bool compareByName(const Data& a, const Data& b)
 {
@@ -149,7 +208,7 @@ int binarySearchByAge(Data* data, int* indexes, int count, int key, function<int
     return -1;
 }
 
-// Редактирование данных, выбор нужных через имя-фамилия (Индексы)
+// Редактирование данных, выбор нужных через имя (Индексы)
 void editRecord(Data* (&data), int count, const string& firstName, const string& lastName, const string& newFirstName, const string& newLastName, int newAge)
 {
     bool found = false;
@@ -171,7 +230,7 @@ void editRecord(Data* (&data), int count, const string& firstName, const string&
     }
 }
 
-// Удаление данных, выбор нужных через имя-фамилия (Индексы)
+// Удаление данных, выбор нужных через имя (Индексы)
 void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firstName)
 {
     ;
@@ -226,241 +285,303 @@ void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firs
     }
 }
 
-// Функция вставки нового узла в дерево (Бинарное дерево)
-Data* insert(Data* node, const Data& data) {
-    if (node == nullptr) {
-        return createNode(data);  // Создание нового узла
+// 
+void deleteAgeTree(AgeTreeNode* node) 
+{
+    if (node != nullptr)
+    {
+        deleteAgeTree(node->left);
+        deleteAgeTree(node->right);
+        delete node;
     }
+}
 
-    // Рекурсивное вставка узла в соответствующее поддерево
-    if (data._initial.firstName < node->_initial.firstName) {
-        node->left = insert(node->left, data);  // Вставка в левое поддерево
+void deleteNameTree(NameTreeNode* node) 
+{
+    if (node != nullptr)
+    {
+        deleteNameTree(node->left);
+        deleteNameTree(node->right);
+        delete node;
     }
-    else if (data._initial.firstName > node->_initial.firstName) {
-        node->right = insert(node->right, data);  // Вставка в правое поддерево
+}
+
+void insertRecord(Data* &records, AgeTreeNode* &rootByAge, NameTreeNode* &rootByFirstName, const Data& record, int& size) 
+{
+    Data* newRecords = new Data[size + 1];
+    for (int i = 0; i < size; ++i) {
+        newRecords[i] = records[i];
+    }
+    newRecords[size++] = record;
+    delete[] records;
+    records = newRecords;
+
+    int index = size - 1;
+
+    // Добавляем в бинарное дерево по возрасту
+    if (rootByAge == nullptr)
+        rootByAge = new AgeTreeNode(record._age.age, index);
+    else
+        insertNodeByAge(rootByAge, record._age.age, index);
+
+    // Добавляем в бинарное дерево по имени
+    if (rootByFirstName == nullptr)
+        rootByFirstName = new NameTreeNode(record._initial.firstName, index);
+    else
+        insertNodeByFirstName(rootByFirstName, record._initial.firstName, index);
+}
+
+// Вспомогательная функция для сортировки по возрасту
+void insertNodeByAge(AgeTreeNode* node, int age, int index) 
+{
+    if (age < node->age)
+    {
+        if (node->left == nullptr)
+        {
+            node->left = new AgeTreeNode(age, index);
+        }
+        else
+        {
+            insertNodeByAge(node->left, age, index);
+        }
+    }
+    else 
+    {
+        if (node->right == nullptr)
+        {
+            node->right = new AgeTreeNode(age, index);
+        }
+        else
+        {
+            insertNodeByAge(node->right, age, index);
+        }
+    }
+}
+
+// Вспомогательная функция для сортировки по имени
+void insertNodeByFirstName(NameTreeNode* node, const string& firstName, int index) 
+{
+    if (firstName < node->firstName) {
+        if (node->left == nullptr) {
+            node->left = new NameTreeNode(firstName, index);
+        }
+        else {
+            insertNodeByFirstName(node->left, firstName, index);
+        }
     }
     else {
-        // Обработка дубликатов, если они не поддерживаются
+        if (node->right == nullptr) {
+            node->right = new NameTreeNode(firstName, index);
+        }
+        else {
+            insertNodeByFirstName(node->right, firstName, index);
+        }
+    }
+}
+
+// Печать по убыванию возраста (Бинарное дерево)
+void printDescendingByAge(Data* records, AgeTreeNode* rootByAge)
+{
+    inorderTraversalByAge(records, rootByAge);
+}
+
+// Вспомогательная функция для печати по возрасту
+void inorderTraversalByAge(Data* records, AgeTreeNode* node) {
+    if (node != nullptr) {
+        inorderTraversalByAge(records, node->left);
+        printRecord(records, node->index);
+        inorderTraversalByAge(records, node->right);
+    }
+}
+
+// Печать по возрастанию имени (по алфавиту) (Бинарное дерево)
+void printAscendingByFirstName(Data* records, NameTreeNode* rootByFirstName)
+{
+    inorderTraversalByFirstName(records, rootByFirstName);
+}
+
+// Вспомогательная функция для печати по имени
+void inorderTraversalByFirstName(Data* records, NameTreeNode* node) {
+    if (node != nullptr) {
+        inorderTraversalByFirstName(records, node->left);
+        printRecord(records, node->index);
+        inorderTraversalByFirstName(records, node->right);
+    }
+}
+
+// Функция печати данных
+void printRecord(Data* records, int index)
+{
+    Data record = records[index];
+    cout << record._initial.firstName << record._initial.lastName << ", возраст: " << record._age.age << ", любимые подарки: " << record._loveGifts.loveGifts << endl;
+    cout << endl;
+}
+
+// Поиск по возрасту
+void searchByAge(Data* records, AgeTreeNode* rootByAge, int age)
+{
+    AgeTreeNode* result = searchNodeByAge(rootByAge, age);
+    if (result != nullptr)
+        printRecord(records, result->index);
+    else
+        cout << "Данные не найлены" << endl;
+}
+
+// Поиск по имени
+void searchByFirstName(Data* records, NameTreeNode* rootByFirstName, const string& firstName)
+{
+    NameTreeNode* result = searchNodeByFirstName(rootByFirstName, firstName);
+    if (result != nullptr)
+        printRecord(records, result->index);
+    else
+        cout << "Данные не найлены" << endl;
+}
+
+// Вспомогательная функция для поиска по возрасту
+AgeTreeNode* searchNodeByAge(AgeTreeNode* node, int age)
+{
+    if (node == nullptr || node->age == age)
         return node;
+
+    if (age < node->age)
+        return searchNodeByAge(node->left, age);
+    else
+        return searchNodeByAge(node->right, age);
+}
+
+// Вспомогательная функция для поиска по имени
+NameTreeNode* searchNodeByFirstName(NameTreeNode* node, const string& firstName)
+{
+    if (node == nullptr || node->firstName == firstName)
+        return node;
+
+    if (firstName < node->firstName)
+        return searchNodeByFirstName(node->left, firstName);
+    else
+        return searchNodeByFirstName(node->right, firstName);
+}
+
+//Редактирование записи по возрасту
+void editRecordbyAge(Data* records, AgeTreeNode* root, int age, const Data& newData)
+{
+    AgeTreeNode* result = searchNodeByAge(root, age);
+    if (result != nullptr)
+    {
+        records[result->index] = newData;
+        result->age = newData._age.age;
     }
-
-    // Обновление высоты узла
-    node->height = 1 + max(height(node->left), height(node->right));
-
-    // Вычисление коэффициента балансировки для узла
-    int balance = balanceFactor(node);
-
-    // Балансировка дерева
-    if (balance > 1 && data._initial.firstName < node->left->_initial.firstName)
-        return rotateRight(node);  // Левый левый случай
-
-    if (balance > 1 && data._initial.firstName > node->left->_initial.firstName) {
-        node->left = rotateLeft(node->left);
-        return rotateRight(node);  // Левый правый случай
+    else
+    {
+        cout << "Данные не найдены" << endl;
     }
+}
 
-    if (balance < -1 && data._initial.firstName > node->right->_initial.firstName)
-        return rotateLeft(node);  // Правый правый случай
+// Редактирование записи по имени
+void editRecordbyName(Data* records, NameTreeNode* root, string firstName, const Data& newData)
+{
+    NameTreeNode* result = searchNodeByFirstName(root, firstName);
+    if (result != nullptr)
+    {
+        records[result->index] = newData;
+        result->firstName = newData._initial.firstName;
+    }
+    else
+    {
+        cout << "Данные не найдены" << endl;
+    }
+}
 
-    if (balance < -1 && data._initial.firstName < node->right->_initial.firstName) {
-        node->right = rotateRight(node->right);
-        return rotateLeft(node);  // Правый левый случай
+// Функция удаления
+void deleteRecordByAge(AgeTreeNode* &root, int age)
+{
+    deleteNodeByAge(root, age);
+}
+
+// Сам алгоритм выполнения удаления по возрасту
+AgeTreeNode* deleteNodeByAge(AgeTreeNode*& node, int age)
+{
+    if (node == nullptr)
+        return node;
+
+    if (age < node->age)
+        node->left = deleteNodeByAge(node->left, age);
+    else if (age > node->age)
+        node->right = deleteNodeByAge(node->right, age);
+    else
+    {
+        if (node->left == nullptr)
+        {
+            AgeTreeNode* temp = node->right;
+            delete node;
+            return temp;
+        }
+        else if (node->right == nullptr)
+        {
+            AgeTreeNode* temp = node->left;
+            delete node;
+            return temp;
+        }
+
+        AgeTreeNode* minRight = findMinAge(node->right);
+        node->age = minRight->age;
+        node->index = minRight->index;
+        node->right = deleteNodeByAge(node->right, minRight->age);
     }
 
     return node;
 }
 
-// Функция поиска по имени (Бинарное дерево)
-void searchByName(Data* root, const string& firstName) {
-    searchByNameUtil(root, firstName);
-}
-
-// Функция поиска по возрасту (Бинарное дерево)
-void searchByAge(Data* root, int age) {
-    searchByAgeUtil(root, age);
-}
-
-// Функция удаления узла из дерева по имени (Бинарное дерево)
-Data* remove(Data* root, const string& firstName) {
-    return removeUtil(root, firstName);
-}
-
-// Вспомогательная функция для получения высоты узла (Бинарное дерево)
-int height(Data* node) {
-    if (node == nullptr) return 0;
-    return node->height;
-}
-
-// Вспомогательная функция для вычисления коэффициента балансировки узла (Бинарное дерево)
-int balanceFactor(Data* node) {
-    if (node == nullptr) return 0;
-    return height(node->left) - height(node->right);
-}
-
-// Вспомогательная функция для выполнения правого вращения узла (Бинарное дерево)
-Data* rotateRight(Data* y) {
-    Data* x = y->left;
-    Data* T2 = x->right;
-
-    x->right = y;
-    y->left = T2;
-
-    y->height = max(height(y->left), height(y->right)) + 1;
-    x->height = max(height(x->left), height(x->right)) + 1;
-
-    return x;
-}
-
-// Вспомогательная функция для выполнения левого вращения узла (Бинарное дерево)
-Data* rotateLeft(Data* x) {
-    Data* y = x->right;
-    Data* T2 = y->left;
-
-    y->left = x;
-    x->right = T2;
-
-    x->height = max(height(x->left), height(x->right)) + 1;
-    y->height = max(height(y->left), height(y->right)) + 1;
-
-    return y;
-}
-
-// Вспомогательная функция для создания нового узла (Бинарное дерево)
-Data* createNode(const Data& data)
+AgeTreeNode* findMinAge(AgeTreeNode* node)
 {
-    Data* newNode = new Data();
-    newNode->_initial = data._initial;
-    /*newNode->_date = data._date;*/
-    newNode->_age = data._age;
-    /*newNode->_loveGifts = data._loveGifts;*/
-    newNode->left = nullptr;
-    newNode->right = nullptr;
-    newNode->height = 1;
-    return newNode;
+    while (node->left != nullptr)
+    {
+        node = node->left;
+    }
+    return node;
 }
 
-// Вспомогательная функция для поиска по имени в дереве (Бинарное дерево)
-void searchByNameUtil(Data* node, const string& firstName) 
+void deleteRecordByName(NameTreeNode*& root, string firstName)
 {
-    if (node == nullptr) return;
-
-    if (node->_initial.firstName == firstName)
-    {
-        // Вывод или дальнейшая обработка найденных данных
-        cout << "Name: " << node->_initial.firstName << " " << node->_initial.lastName << endl;
-        /*cout << "Date of Birth: " << node->_date.day << "/" << node->_date.month << endl;*/
-        cout << "Age: " << node->_age.age << endl;
-        /*cout << "Gifts: " << node->_loveGifts.loveGifts << endl;*/
-
-        return;
-    }
-
-    if (firstName < node->_initial.firstName)
-    {
-        searchByNameUtil(node->left, firstName);
-    }
-    else
-    {
-        searchByNameUtil(node->right, firstName);
-    }
+    deleteNodeByName(root, firstName);
 }
 
-// Вспомогательная функция для поиска по возрасту в дереве (Бинарное дерево)
-void searchByAgeUtil(Data* node, int age) 
+NameTreeNode* deleteNodeByName(NameTreeNode*& node, string firstName)
 {
-    if (node == nullptr) return;
+    if (node == nullptr)
+        return node;
 
-    if (node->_age.age == age)
-    {
-        // Вывод или дальнейшая обработка найденных данных
-        cout << "Name: " << node->_initial.firstName << " " << node->_initial.lastName << endl;
-        /*cout << "Date of Birth: " << node->_date.day << "/" << node->_date.month << endl;*/
-        cout << "Age: " << node->_age.age << endl;
-        /*cout << "Gifts: " << node->_loveGifts.loveGifts << endl;*/
-
-        return;
+    if (firstName < node->firstName)
+        node->left = deleteNodeByName(node->left, firstName);
+    else if (firstName > node->firstName) {
+        node->right = deleteNodeByName(node->right, firstName);
     }
-
-    if (age < node->_age.age)
+    else 
     {
-        searchByAgeUtil(node->left, age);
-    }
-    else
-    {
-        searchByAgeUtil(node->right, age);
-    }
-}
-
-// Вспомогательная функция для поиска минимального узла в правом поддереве (Бинарное дерево)
-Data* minValueNode(Data* node)
-{
-    Data* current = node;
-    while (current->left != nullptr)
-    {
-        current = current->left;
-    }
-    return current;
-}
-
-// Вспомогательная функция для удаления узла из дерева (Бинарное дерево)
-Data* removeUtil(Data* root, const string& firstName)
-{
-    if (root == nullptr) return root;
-
-    if (firstName < root->_initial.firstName)
-    {
-        root->left = removeUtil(root->left, firstName);
-    }
-    else if (firstName > root->_initial.firstName)
-    {
-        root->right = removeUtil(root->right, firstName);
-    }
-    else
-    {
-        if (root->left == nullptr || root->right == nullptr)
+        if (node->left == nullptr)
         {
-            Data* temp = root->left ? root->left : root->right;
-            if (temp == nullptr)
-            {
-                temp = root;
-                root = nullptr;
-            }
-            else
-            {
-                *root = *temp;
-            }
-            delete temp;
+            NameTreeNode* temp = node->right;
+            delete node;
+            return temp;
         }
-        else
+        else if (node->right == nullptr)
         {
-            Data* temp = minValueNode(root->right);
-            root->_initial = temp->_initial;
-            root->right = removeUtil(root->right, temp->_initial.firstName);
+            NameTreeNode* temp = node->left;
+            delete node;
+            return temp;
         }
+
+        NameTreeNode* minRight = findMinName(node->right);
+        node->firstName = minRight->firstName;
+        node->index = minRight->index;
+        node->right = deleteNodeByName(node->right, minRight->firstName);
     }
 
-    if (root == nullptr) return root;
+    return node;
+}
 
-    root->height = 1 + max(height(root->left), height(root->right));
-
-    int balance = balanceFactor(root);
-
-    // Четыре случая несбалансированности, обрабатываемые соответствующими вращениями
-    if (balance > 1 && balanceFactor(root->left) >= 0)
-        return rotateRight(root);  // Левый левый случай
-
-    if (balance > 1 && balanceFactor(root->left) < 0) {
-        root->left = rotateLeft(root->left);
-        return rotateRight(root);  // Левый правый случай
+NameTreeNode* findMinName(NameTreeNode* node) {
+    while (node->left != nullptr) {
+        node = node->left;
     }
-
-    if (balance < -1 && balanceFactor(root->right) <= 0)
-        return rotateLeft(root);  // Правый правый случай
-
-    if (balance < -1 && balanceFactor(root->right) > 0) {
-        root->right = rotateRight(root->right);
-        return rotateLeft(root);  // Правый левый случай
-    }
-
-    return root;
+    return node;
 }

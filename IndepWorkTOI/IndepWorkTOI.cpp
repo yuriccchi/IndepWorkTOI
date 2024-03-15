@@ -33,15 +33,21 @@ int main()
     // Инициализация нужных переменных
     int maxSize = 200;
     int count = 0;
-    string firstName, lastName, newFirstName, newLastName;
+    string firstName, lastName, newFirstName, newLastName, gift;
     string searchName;
+    int day, month;
     int newAge;
     int _stateMenu = -1;
-    TreeNode* foundNode;
 
-    //Массивы
+    // Массивы
     Data* data = new Data[maxSize];
     int* indexes = new int[maxSize];
+
+    // Деревья индексов
+    Data* binaryData = new Data[0];
+    AgeTreeNode* rootByAge = new AgeTreeNode();
+    NameTreeNode* rootByFirstName = new NameTreeNode();
+    int binarySize = 0;
 
     while (_stateMenu != 0)
     {
@@ -121,12 +127,36 @@ int main()
             deleteRecord(data, count, indexes, firstName);
             break;
         case 8:
-            dataInput(data, count, indexTree);
+            cout << "Введите количество вводимых сейчас данных: ";
+            int newDataCount;
+            cin >> newDataCount;
+
+            for (int i = 0; i < newDataCount; i++)
+            {
+                cout << "Введите имя и фамилию: ";
+                cin >> firstName >> lastName;
+
+                cout << "Введите день и месяц дня рождения: ";
+                day = intInputDay();
+                month = intInputMonth();
+
+                cout << "Введите, сколько лет сейчас вашему другу: ";
+                newAge = intInputValue();
+
+                cout << "Введите, какие подарки любит ваш друг: ";
+                cin >> gift;
+
+                cout << "___________________________" << endl;
+
+                Data record = { {firstName, lastName}, {day, month}, {newAge}, {gift} };
+                insertRecord(binaryData, rootByAge, rootByFirstName, record, binarySize);
+            }
+            
             break;
         case 9:
-            /*cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
-            printNameAscending(data, indexTree.root);
-            break;*/
+            cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
+            printAscendingByFirstName(binaryData, rootByFirstName);
+            break;
         case 10:
             /*cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
             printAgeDescending(indexTree.root, data);

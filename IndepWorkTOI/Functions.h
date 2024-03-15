@@ -44,13 +44,24 @@ struct Data
 };
 
 // Структура бинарного дерева для возраста
-struct TreeNode
+struct AgeTreeNode
 {
     int age;
     int index;
-    TreeNode* left;
-    TreeNode* right;
-    TreeNode(int age, int index) : age(age), index(index), left(nullptr), right(nullptr) {}
+    AgeTreeNode* left;
+    AgeTreeNode* right;
+    AgeTreeNode() : age(NULL), index(NULL), left(nullptr), right(nullptr) {}
+    AgeTreeNode(int age, int index) : age(age), index(index), left(nullptr), right(nullptr) {}
+};
+
+struct NameTreeNode
+{
+    string firstName;
+    int index;
+    NameTreeNode* left;
+    NameTreeNode* right;
+    NameTreeNode() : firstName(""), index(NULL), left(nullptr), right(nullptr) {}
+    NameTreeNode(string firstName, int index) : firstName(firstName), index(index), left(nullptr), right(nullptr) {}
 };
 
 // Компаратор для бинарного поиска по имени
@@ -88,9 +99,27 @@ void editRecord(Data* (&data), int count, const string& firstName, const string&
 void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firstName);
 
 //  для части 2
-Data* insert(Data* node, const Data& data);
-void searchByName(Data* root, const string& firstName);
-void searchByAge(Data* root, int age);
-Data* remove(Data* root, const string& firstName);
+void insertRecord(Data*& records, AgeTreeNode*& rootByAge, NameTreeNode*& rootByFirstName, const Data& record, int& size);
+void insertNodeByAge(AgeTreeNode* node, int age, int index);
+void printAscendingByFirstName(Data* records, NameTreeNode* rootByFirstName);
+void printAscendingByAge(Data* records, AgeTreeNode* rootByAge);
+void searchByFirstName(Data* records, NameTreeNode* rootByFirstName, const string& firstName);
+void searchByAge(Data* records, AgeTreeNode* rootByAge, int age);
+void editRecordbyName(Data* records, NameTreeNode* root, string firstName, const Data& newData);
+void editRecordbyAge(Data* records, AgeTreeNode* rootByAge, int age, const Data& newData);
+void deleteNameTree(NameTreeNode* node);
+void deleteAgeTree(AgeTreeNode* node);
+void insertNodeByFirstName(NameTreeNode* node, const string& firstName, int index);
+void inorderTraversalByAge(Data* records, AgeTreeNode* node);
+void inorderTraversalByFirstName(Data* records, NameTreeNode* node);
+void printRecord(Data* records, int index);
+AgeTreeNode* searchNodeByAge(AgeTreeNode* node, int age);
+NameTreeNode* searchNodeByFirstName(NameTreeNode* node, const string& firstName);
+void deleteRecordByAge(AgeTreeNode*& root, int age);
+AgeTreeNode* deleteNodeByAge(AgeTreeNode*& node, int age);
+AgeTreeNode* findMinAge(AgeTreeNode* node);
+void deleteRecordByName(NameTreeNode*& root, string firstName);
+NameTreeNode* deleteNodeByName(NameTreeNode*& node, string firstName);
+NameTreeNode* findMinName(NameTreeNode* node);
 
 //  для части 3
