@@ -4,7 +4,7 @@
 #include <algorithm>
 
 void Menu()
-{
+{    
     cout << "Выберите действие: " << endl
         << "1. Ввод данных (Индекс-массив)" << endl
         << "2. Вывод данных, отсортированных по алфавиту (Индекс-массив)" << endl
@@ -20,6 +20,13 @@ void Menu()
         << "12. Поиск по возрасту (Бинарное дерево)" << endl
         << "13. Редактирование записи (Бинарное дерево)" << endl
         << "14. Удаление записи (Бинарное дерево)" << endl
+        << "15. Ввод данных (Линейный список)" << endl
+        << "16. Вывод данных в изначальном порядке (Линейный список)" << endl
+        << "17. Вывод данных, отсортированных по имени (Линейный список)" << endl
+        << "18. Вывод данных, отсортированных по возрасту (Линейный список)" << endl
+        << "19. Поиск по имени (Линейный список)" << endl
+        << "20. Поиск по возрасту (Линейный список)" << endl
+        << "21. Удаление записи (Линейный сипсок)" << endl
         << "0. Выход" << endl
         << "Ваш выбор: ";
 }
@@ -45,9 +52,13 @@ int main()
 
     // Деревья индексов
     Data* binaryData = new Data[0];
-    AgeTreeNode* rootByAge = new AgeTreeNode();
-    NameTreeNode* rootByFirstName = new NameTreeNode();
+    AgeTreeNode* rootByAge = nullptr; // Изменение инициализации
+    NameTreeNode* rootByFirstName = nullptr; // Изменение инициализации
     int binarySize = 0;
+
+    // Линейный список
+    Node* head = nullptr;
+    int lineSize = 0;
 
     while (_stateMenu != 0)
     {
@@ -58,17 +69,19 @@ int main()
         {
         case 1:
             dataInput(data, count, indexes);
+            cout << endl;
             break;
         case 2:
             cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
             printNameAscending(data, indexes, count);
+            cout << endl;
             break;
         case 3:
             cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
             printAgeDescending(data, indexes, count);
+            cout << endl;
             break;
         case 4:
-            // Поиск записи
             cout << "Введите имя для поиска: ";
             cin >> searchName;
             {
@@ -85,9 +98,9 @@ int main()
                     cout << "Запись с указанным именем не найдена" << endl;
                 }
             }
+            cout << endl;
             break;
         case 5:
-            // Поиск записи
             int searchAge;
             cout << "Введите возраст для поиска: ";
             searchAge = intInputValue();
@@ -105,26 +118,30 @@ int main()
                     cout << "Запись с указанным возрастом не найдена" << endl;
                 }
             }
+            cout << endl;
             break;
         case 6:
-            // Редактирование записи
             cout << "Введите имя и фамилию записи для редактирования: ";
             cin >> firstName >> lastName;
             cout << "Введите новые имя и фамилию: ";
             cin >> newFirstName >> newLastName;
+            cout << "Введите новые месяц и день дня рождения: ";
+            month = intInputMonth();
+            day = intInputDay(month);          
             cout << "Введите новый возраст: ";
             newAge = intInputValue();
             editRecord(data, count, firstName, lastName, newFirstName, newLastName, newAge);
-            cout << "Запись успешно отредактирована." << endl;
+            cout << "Запись успешно отредактирована" << endl;
+            cout << endl;
             break;
         case 7:
-            // Удаление записи
             sort(indexes, indexes + count, [&](int a, int b) {
                 return compareByName(data[a], data[b]);
                 });
             cout << "Введите имя записи для удаления: ";
             cin >> firstName;
             deleteRecord(data, count, indexes, firstName);
+            cout << endl;
             break;
         case 8:
             cout << "Введите количество вводимых сейчас данных: ";
@@ -136,9 +153,9 @@ int main()
                 cout << "Введите имя и фамилию: ";
                 cin >> firstName >> lastName;
 
-                cout << "Введите день и месяц дня рождения: ";
-                day = intInputDay();
+                cout << "Введите месяц и день дня рождения: ";              
                 month = intInputMonth();
+                day = intInputDay(month);
 
                 cout << "Введите, сколько лет сейчас вашему другу: ";
                 newAge = intInputValue();
@@ -151,40 +168,103 @@ int main()
                 Data record = { {firstName, lastName}, {day, month}, {newAge}, {gift} };
                 insertRecord(binaryData, rootByAge, rootByFirstName, record, binarySize);
             }
-            
+            cout << endl;
             break;
         case 9:
             cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
             printAscendingByFirstName(binaryData, rootByFirstName);
+            cout << endl;
             break;
         case 10:
-            /*cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
-            printAgeDescending(indexTree.root, data);
-            break;*/
+            cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
+            printDescendingByAge(binaryData, rootByAge);
+            cout << endl;
+            break;
         case 11:
-            /*cout << "Введите имя для поиска: ";
-            cin >> searchName;
-            foundNode = searchByName(indexTree.root, searchName, data);
-            break;*/
-
+            cout << "Введите имя для поиска: ";
+            cin >> firstName;
+            searchByFirstName(binaryData, rootByFirstName, firstName);
+            cout << endl;
+            break;
         case 12:
-            //cout << "Введите возраст для поиска: ";
-            //searchAge = intInputValue();
-            //foundNode = searchByAge(indexTree.root, searchAge, data);
-            //break;
+            int age;
+            cout << "Введите возраст для поиска: ";
+            age = intInputValue();
+            searchByAge(binaryData, rootByAge, age);
+            cout << endl;
+            break;
         case 13:
-            ///* Редактирование записи
-            /*newAge;
-            cout << "Введите новые данные для редактирования записи:" << endl;
-            cout << "Новое имя: ";
-            cin >> newFirstName;
-            cout << "Новая фамилия: ";
-            cin >> newLastName;
-            cout << "Новый возраст: ";
-            newAge = intInputValue();
-            editRecord(data, indexTree.root, searchName, newFirstName, newLastName, newAge);
-            break;*/
+            cout << "Введите имя для поиска: ";
+            cin >> firstName;
+            editRecordbyName(binaryData, rootByFirstName, firstName);
+            cout << endl;
+            break;
         case 14:
+            cout << "Введите имя для поиска: ";
+            cin >> firstName;
+            deleteRecordByName(rootByFirstName, firstName);
+            cout << endl;
+            break;
+        case 15:
+            cout << "Введите количество вводимых сейчас данных: ";
+            cin >> lineSize;
+
+            for (int i = 0; i < lineSize; i++)
+            {
+                cout << "Введите имя и фамилию: ";
+                cin >> firstName >> lastName;
+
+                cout << "Введите месяц и день дня рождения: ";
+                month = intInputMonth();
+                day = intInputDay(month);
+
+                cout << "Введите, сколько лет сейчас вашему другу: ";
+                newAge = intInputValue();
+
+                cout << "Введите, какие подарки любит ваш друг: ";
+                cin >> gift;
+
+                cout << "___________________________" << endl;
+
+                Data record = { {firstName, lastName}, {day, month}, {newAge}, {gift} };
+                insert(head, record);
+            }
+            cout << endl;
+            break;
+        case 16:
+            cout << "Данные:" << endl;
+            printList(head);
+            cout << endl;
+            break;
+        case 17:
+            cout << "Данные отсортированные по алфавиту имени (по возрастанию):" << endl;
+            sortByFirstName(head);
+            printList(head);
+            cout << endl;
+            break;
+        case 18:
+            cout << "Данные отсортированные по возрасту (по убыванию):" << endl;
+            sortByAge(head);
+            printList(head);
+            cout << endl;
+            break;
+        case 19:
+            cout << "Введите имя для поиска: ";
+            cin >> firstName;
+            searchByName(head, firstName);
+            cout << endl;
+            break;
+        case 20:
+            cout << "Введите возраст для поиска: ";
+            age = intInputValue();
+            searchByAge(head, age);
+            cout << endl;
+            break;
+        case 21:
+            cout << "Введите имя для поиска и удаления: ";
+            cin >> firstName;
+            deleteByName(head, firstName);
+            cout << endl;
             break;
         case 0:
             cout << "Выход из программы" << endl;
@@ -195,7 +275,8 @@ int main()
         }
     }
 
-    delete[] data;
+    //delete[] data;
+    //delete[]
 
     return 0;
 
