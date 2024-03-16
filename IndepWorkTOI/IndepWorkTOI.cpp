@@ -57,7 +57,7 @@ int main()
     int binarySize = 0;
 
     // Линейный список
-    Node* head = nullptr;
+    LinkedList* head = nullptr;
     int lineSize = 0;
 
     while (_stateMenu != 0)
@@ -275,9 +275,5 @@ int main()
         }
     }
 
-    //delete[] data;
-    //delete[]
-
     return 0;
-
 }

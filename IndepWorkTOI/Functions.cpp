@@ -270,7 +270,7 @@ void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firs
             return;
         }
 
-        Data* newBooks = new Data[newSize];
+        Data* newData = new Data[newSize];
         int* newIndexes = new int[newSize];
 
         int i;
@@ -291,12 +291,12 @@ void deleteRecord(Data* (&data), int& count, int* (&indexes), const string& firs
         for (i = 0; i < newSize; i++)
         {
             if (i < deletePos)
-                newBooks[i] = data[i];
+                newData[i] = data[i];
             else
-                newBooks[i] = data[i + 1];
+                newData[i] = data[i + 1];
         }
 
-        data = newBooks;
+        data = newData;
         indexes = newIndexes;
         count = newSize;
     }
@@ -600,9 +600,9 @@ AgeTreeNode* findMinAge(AgeTreeNode* node)
 }
 
 // Функция для вставки элемента в конец списка
-void insert(Node*& head, Data data)
+void insert(LinkedList*& head, Data data)
 {
-    Node* newNode = new Node;
+    LinkedList* newNode = new LinkedList;
     newNode->data = data;
     newNode->next = nullptr;
 
@@ -612,7 +612,7 @@ void insert(Node*& head, Data data)
         return;
     }
 
-    Node* temp = head;
+    LinkedList* temp = head;
     while (temp->next != nullptr)
     {
         temp = temp->next;
@@ -622,19 +622,19 @@ void insert(Node*& head, Data data)
 }
 
 // Функция для сортировки списка по возрастанию имени
-void sortByFirstName(Node*& head)
+void sortByFirstName(LinkedList*& head)
 {
     if (head == nullptr || head->next == nullptr)
     {
         return;
     }
 
-    Node* sorted = nullptr;
-    Node* current = head;
+    LinkedList* sorted = nullptr;
+    LinkedList* current = head;
 
     while (current != nullptr)
     {
-        Node* next = current->next;
+        LinkedList* next = current->next;
 
         if (sorted == nullptr || sorted->data._initial.firstName >= current->data._initial.firstName)
         {
@@ -643,7 +643,7 @@ void sortByFirstName(Node*& head)
         }
         else
         {
-            Node* temp = sorted;
+            LinkedList* temp = sorted;
             while (temp->next != nullptr && temp->next->data._initial.firstName < current->data._initial.firstName)
             {
                 temp = temp->next;
@@ -659,19 +659,19 @@ void sortByFirstName(Node*& head)
 }
 
 // Функция для сортировки списка по убыванию возраста
-void sortByAge(Node*& head)
+void sortByAge(LinkedList*& head)
 {
     if (head == nullptr || head->next == nullptr)
     {
         return;
     }        
 
-    Node* sorted = nullptr;
-    Node* current = head;
+    LinkedList* sorted = nullptr;
+    LinkedList* current = head;
 
     while (current != nullptr)
     {
-        Node* next = current->next;
+        LinkedList* next = current->next;
 
         if (sorted == nullptr || sorted->data._age.age <= current->data._age.age)
         {
@@ -680,7 +680,7 @@ void sortByAge(Node*& head)
         }
         else
         {
-            Node* temp = sorted;
+            LinkedList* temp = sorted;
             while (temp->next != nullptr && temp->next->data._age.age > current->data._age.age)
             {
                 temp = temp->next;
@@ -696,9 +696,9 @@ void sortByAge(Node*& head)
 }
 
 // Функция для печати записей списка
-void printList(Node* head)
+void printList(LinkedList* head)
 {
-    Node* temp = head;
+    LinkedList* temp = head;
 
     if (temp == nullptr)
     {
@@ -713,12 +713,12 @@ void printList(Node* head)
 }
 
 // Функция для поиска записей по имени
-void searchByName(Node* head, string name)
+void searchByName(LinkedList* head, string name)
 {
     sortByFirstName(head);
     bool found = false;
 
-    Node* temp = head;
+    LinkedList* temp = head;
     while (temp != nullptr)
     {
         if (temp->data._initial.firstName == name)
@@ -737,12 +737,12 @@ void searchByName(Node* head, string name)
 }
 
 // Функция для поиска записей по возрасту
-void searchByAge(Node* head, int age)
+void searchByAge(LinkedList* head, int age)
 {
     sortByAge(head);
     bool found = false;
 
-    Node* temp = head;
+    LinkedList* temp = head;
     while (temp != nullptr)
     {
         if (temp->data._age.age == age)
@@ -761,12 +761,12 @@ void searchByAge(Node* head, int age)
 }
 
 // Функция для удаления записи по имени
-void deleteByName(Node*& head, string name)
+void deleteByName(LinkedList*& head, string name)
 {
     sortByFirstName(head);
 
-    Node* temp = head;
-    Node* prev = nullptr;
+    LinkedList* temp = head;
+    LinkedList* prev = nullptr;
 
     while (temp != nullptr && temp->data._initial.firstName != name)
     {

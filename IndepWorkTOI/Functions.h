@@ -66,10 +66,10 @@ struct AgeTreeNode
 };
 
 // Элемент линейного списка
-struct Node
+struct LinkedList
 {
     Data data;
-    Node* next;
+    LinkedList* next;
 };
 
 // Компаратор для бинарного поиска по имени
@@ -131,10 +131,10 @@ NameTreeNode* findMinName(NameTreeNode* node);
 AgeTreeNode* findMinAge(AgeTreeNode* node);
 
 //  для части 3
-void insert(Node*& head, Data data);
-void sortByFirstName(Node*& head);
-void sortByAge(Node*& head);
-void printList(Node* head);
-void searchByName(Node* head, string name);
-void searchByAge(Node* head, int age);
-void deleteByName(Node*& head, string name);
+void insert(LinkedList*& head, Data data);
+void sortByFirstName(LinkedList*& head);
+void sortByAge(LinkedList*& head);
+void printList(LinkedList* head);
+void searchByName(LinkedList* head, string name);
+void searchByAge(LinkedList* head, int age);
+void deleteByName(LinkedList*& head, string name);
